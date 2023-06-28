@@ -1,13 +1,13 @@
 from pprint import pprint
 from datetime import datetime
-# импорты
+
 import vk_api
 from vk_api.exceptions import ApiError
 
 from config import acces_token
 
 
-# получение данных о пользователе
+'''получение данных о пользователе'''
 
 
 class VkTools:
@@ -15,7 +15,7 @@ class VkTools:
         self.vkapi = vk_api.VkApi(token=acces_token)
 
     def _bdate_toyear(self, bdate):
-        user_year = bdate.split('.')[2] if bdate else None
+        user_year = bdate.split('.')[2]
         now = datetime.now().year
         return now - int(user_year)
 
@@ -34,17 +34,11 @@ class VkTools:
         result = {'name': (info['first_name'] + ' ' + info['last_name']) if
                   'first_name' in info and 'last_name' in info else None,
                   'sex': info.get('sex'),
-                  'city': info.get('city')['title'] if info.get('city') is not None else None,
+                  'city': info.get('city')['title'] if info.get('city') is not None
+                  else None,
                   'year': self._bdate_toyear(info.get('bdate'))
                   }
         return result
-
-    # def check(self, result: dict):
-    #     if self.result['city'] is None:
-    #         self.message_send(
-    #              event.user_id, 'Укажите Ваш город')
-    #     return result
-
 
     def search_worksheet(self, params, offset):
         try:
@@ -90,8 +84,7 @@ class VkTools:
                   ]
         '''сортировка по лайкам и комментам'''
 
-        lambda photos: photos['likes']['count']
-        lambda photos: photos['comments']['count']
+        result.sort(key=lambda x: x['likes'] + x['comments'] * 50, reverse=True)
 
         return result[:3]
 
@@ -100,7 +93,7 @@ if __name__ == '__main__':
     user_id = 806915587
     tools = VkTools(acces_token)
     params = tools.get_profile_info(user_id)
-    worksheets = tools.search_worksheet(params, 20)
+    worksheets = tools.search_worksheet(params, 50)
     worksheet = worksheets.pop()
     photos = tools.get_photos(worksheet['id'])
 
