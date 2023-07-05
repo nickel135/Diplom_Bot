@@ -28,6 +28,12 @@ class BotInterface:
                         'random_id': get_random_id()}
                        )
 
+    def get_photo_string(worksheet['id']):
+        photos = self.vk_tools.get_photos(worksheet['id'])
+        photo_string = ''
+        for photo in photos:
+            photo_string += f'photo{photo["owner_id"]}_{photo["id"]},'
+
     '''Получение недостающих данных о пользователе'''
 
     def get_city(self, event):
@@ -54,10 +60,7 @@ class BotInterface:
                         event.user_id, 'Начинаем поиск')
                     if self.worksheets:
                         worksheet = self.worksheets.pop()
-                        photos = self.vk_tools.get_photos(worksheet['id'])
-                        photo_string = ''
-                        for photo in photos:
-                            photo_string += f'photo{photo["owner_id"]}_{photo["id"]},'
+                        get_photo_string(worksheet['id'])
                     else:
                         self.worksheets = self.vk_tools.search_worksheet(
                             self.params, self.offset)
@@ -68,11 +71,10 @@ class BotInterface:
 
                         check_user(engine=engine, profile_id=profile_id,
                                        worksheet_id=worksheet_id)
-
-                        photos = self.vk_tools.get_photos(worksheet['id'])
-                        photo_string = ''
-                        for photo in photos:
-                            photo_string += f'photo{photo["owner_id"]}_{photo["id"]},'
+                        worksheet_id = list.pop()
+                        while check_user(worksheet_id):
+                            worksheet_id = list.pop()
+                        get_photo_string(worksheet['id'])
                         self.offset += 50
 
                     self.message_send(
@@ -86,6 +88,10 @@ class BotInterface:
                     add_user(engine=engine, profile_id=profile_id,
                              worksheet_id=worksheet_id)
 
+                elif event.text.lower() == 'далее':
+                    self.message_send(
+                        event.user_id, worksheet['id'])
+
                 elif event.text.lower() == 'пока':
                     self.message_send(
                         event.user_id, 'До новых встреч')
@@ -94,6 +100,3 @@ class BotInterface:
                         event.user_id, 'Неизвестная команда')
 
 
-if __name__ == '__main__':
-    bot_interface = BotInterface(comunity_token, acces_token)
-    bot_interface.event_handler()

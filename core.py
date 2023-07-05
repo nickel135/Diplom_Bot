@@ -89,12 +89,3 @@ class VkTools:
         return result[:3]
 
 
-if __name__ == '__main__':
-    user_id = 806915587
-    tools = VkTools(acces_token)
-    params = tools.get_profile_info(user_id)
-    worksheets = tools.search_worksheet(params, 50)
-    worksheet = worksheets.pop()
-    photos = tools.get_photos(worksheet['id'])
-
-    pprint(worksheets)
